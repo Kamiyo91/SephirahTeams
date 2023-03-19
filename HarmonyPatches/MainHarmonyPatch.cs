@@ -17,6 +17,15 @@ namespace SephirahTeams.HarmonyPatches
             var unit = __instance._unitList.FirstOrDefault(x => x.unitData.isSephirah);
             if (unit == null) return;
             var unitPassives = unit.unitData.bookItem.CreatePassiveList();
+            if (unitPassives.Exists(x => x is PassiveAbility_AdditionalFloorTeam_ST4221))
+            {
+                var sephirah = (unitPassives.FirstOrDefault(x => x is PassiveAbility_AdditionalFloorTeam_ST4221) as
+                    PassiveAbility_AdditionalFloorTeam_ST4221)?.GetSephirah();
+                if (!sephirah.HasValue || sephirah == SephirahType.None) return;
+                foreach (var unitDataModel in LibraryModel.Instance.GetFloor(sephirah.Value).GetUnitDataList())
+                    __instance._unitList.Add(UnitUtil.InitUnitDefault(stage, unitDataModel));
+            }
+
             if (!unitPassives.Exists(x => x is PassiveAbility_SephirahTeam_ST4221)) return;
             var sephirahs =
                 (unitPassives.FirstOrDefault(x => x is PassiveAbility_SephirahTeam_ST4221) as
@@ -30,34 +39,29 @@ namespace SephirahTeams.HarmonyPatches
         public static void BookModel_CanSuccessionPassive(BookModel __instance, PassiveModel targetpassive,
             ref GivePassiveState haspassiveState, ref bool __result)
         {
-            if (targetpassive.originData.currentpassive.id.packageId != ModParameters.PackageId) return;
+            if (targetpassive.originData.currentpassive.id.packageId != SephirahTeamModParameters.PackageId) return;
             if (UI.UIController.Instance.CurrentUnit != null && !UI.UIController.Instance.CurrentUnit.isSephirah)
             {
                 haspassiveState = GivePassiveState.Lock;
                 __result = false;
             }
 
-            switch (targetpassive.originData.currentpassive.id.id)
+            var passive =
+                Singleton<AssemblyManager>.Instance.CreateInstance_PassiveAbility(targetpassive.originData
+                    .currentpassive.script);
+            if (passive is PassiveAbility_AdditionalFloorTeam_ST4221 pas &&
+                UI.UIController.Instance.CurrentUnit?.OwnerSephirah == pas.GetSephirah())
             {
-                case 1 when __instance.GetPassiveModelList()
-                    .Any(x => x.reservedData.currentpassive.id == new LorId(ModParameters.PackageId, 2) ||
-                              x.reservedData.currentpassive.id == new LorId(ModParameters.PackageId, 4)):
-                    haspassiveState = GivePassiveState.Lock;
-                    __result = false;
-                    break;
-                case 2 when __instance.GetPassiveModelList()
-                    .Any(x => x.reservedData.currentpassive.id == new LorId(ModParameters.PackageId, 1) ||
-                              x.reservedData.currentpassive.id == new LorId(ModParameters.PackageId, 4)):
-                    haspassiveState = GivePassiveState.Lock;
-                    __result = false;
-                    break;
-                case 4 when __instance.GetPassiveModelList()
-                    .Any(x => x.reservedData.currentpassive.id == new LorId(ModParameters.PackageId, 2) ||
-                              x.reservedData.currentpassive.id == new LorId(ModParameters.PackageId, 1)):
-                    haspassiveState = GivePassiveState.Lock;
-                    __result = false;
-                    break;
+                haspassiveState = GivePassiveState.Lock;
+                __result = false;
             }
+
+            if (targetpassive.originData.currentpassive.id.packageId != SephirahTeamModParameters.PackageId ||
+                __instance.GetPassiveModelList().All(x =>
+                    x.reservedData.currentpassive.id.packageId != SephirahTeamModParameters.PackageId))
+                return;
+            haspassiveState = GivePassiveState.Lock;
+            __result = false;
         }
 
         [HarmonyPostfix]
