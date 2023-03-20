@@ -18,13 +18,13 @@ namespace SephirahTeams.HarmonyPatches
             if (unit == null) return;
             var unitPassives = unit.unitData.bookItem.CreatePassiveList();
             if (unitPassives.Exists(x => x is PassiveAbility_AdditionalFloorTeam_ST4221))
-            {
-                var sephirah = (unitPassives.FirstOrDefault(x => x is PassiveAbility_AdditionalFloorTeam_ST4221) as
-                    PassiveAbility_AdditionalFloorTeam_ST4221)?.GetSephirah();
-                if (!sephirah.HasValue || sephirah == SephirahType.None) return;
-                foreach (var unitDataModel in LibraryModel.Instance.GetFloor(sephirah.Value).GetUnitDataList())
-                    __instance._unitList.Add(UnitUtil.InitUnitDefault(stage, unitDataModel));
-            }
+                foreach (var passive in unitPassives.Where(x => x is PassiveAbility_AdditionalFloorTeam_ST4221))
+                {
+                    var typedPassive = passive as PassiveAbility_AdditionalFloorTeam_ST4221;
+                    foreach (var unitDataModel in LibraryModel.Instance.GetFloor(typedPassive.GetSephirah())
+                                 .GetUnitDataList())
+                        __instance._unitList.Add(UnitUtil.InitUnitDefault(stage, unitDataModel));
+                }
 
             if (!unitPassives.Exists(x => x is PassiveAbility_SephirahTeam_ST4221)) return;
             var sephirahs =

@@ -58,7 +58,8 @@ namespace SephirahTeams
 
         private static void OnInitCredenza()
         {
-            ModParameters.CredenzaOptions.Add(SephirahTeamModParameters.PackageId, new CredenzaOptions(baseIconSpriteId:"Chapter1",credenzaName:"Sephirah Teams"));
+            ModParameters.CredenzaOptions.Add(SephirahTeamModParameters.PackageId,
+                new CredenzaOptions(baseIconSpriteId: "Chapter1", credenzaName: "Sephirah Teams"));
         }
 
         private static void OnInitSprites()

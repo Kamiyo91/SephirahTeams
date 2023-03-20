@@ -1,7 +1,5 @@
 ﻿using System.Linq;
-using BigDLL4221.Models;
 using BigDLL4221.Utils;
-using UnityEngine;
 
 namespace SephirahTeams.Passives
 {
@@ -42,13 +40,7 @@ namespace SephirahTeams.Passives
             if (StageModel.team.emotionLevel > SelectionMaxNumber() + 1 ||
                 EmotionCards >= StageModel.team.emotionLevel) return;
             EmotionCards++;
-            var emotionList = CardUtil.CreateSephirahSelectableList(owner.emotionDetail.EmotionLevel, GetSephirah());
-            StaticModsInfo.OnPlayCardEmotion = true;
-            if (emotionList.Count <= 0) return;
-            if (!SingletonBehavior<BattleManagerUI>.Instance.ui_levelup.IsEnabled)
-                SingletonBehavior<BattleManagerUI>.Instance.ui_levelup.SetRootCanvas(true);
-            SingletonBehavior<BattleManagerUI>.Instance.ui_levelup.Init(
-                Mathf.Clamp(owner.emotionDetail.EmotionLevel - 1, 0, 4), emotionList);
+            SephirahEmotionTool.SetParameters(GetSephirah(), StageModel.team.emotionLevel);
         }
 
         public override void OnBattleEnd()
