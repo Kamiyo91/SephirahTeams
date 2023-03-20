@@ -18,6 +18,7 @@ namespace SephirahTeams.HarmonyPatches
             if (unit == null) return;
             var unitPassives = unit.unitData.bookItem.CreatePassiveList();
             if (unitPassives.Exists(x => x is PassiveAbility_AdditionalFloorTeam_ST4221))
+            {
                 foreach (var passive in unitPassives.Where(x => x is PassiveAbility_AdditionalFloorTeam_ST4221))
                 {
                     var typedPassive = passive as PassiveAbility_AdditionalFloorTeam_ST4221;
@@ -25,6 +26,9 @@ namespace SephirahTeams.HarmonyPatches
                                  .GetUnitDataList())
                         __instance._unitList.Add(UnitUtil.InitUnitDefault(stage, unitDataModel));
                 }
+
+                return;
+            }
 
             if (!unitPassives.Exists(x => x is PassiveAbility_SephirahTeam_ST4221)) return;
             var sephirahs =
@@ -49,17 +53,8 @@ namespace SephirahTeams.HarmonyPatches
             var passive =
                 Singleton<AssemblyManager>.Instance.CreateInstance_PassiveAbility(targetpassive.originData
                     .currentpassive.script);
-            if (passive is PassiveAbility_AdditionalFloorTeam_ST4221 pas &&
-                UI.UIController.Instance.CurrentUnit?.OwnerSephirah == pas.GetSephirah())
-            {
-                haspassiveState = GivePassiveState.Lock;
-                __result = false;
-            }
-
-            if (targetpassive.originData.currentpassive.id.packageId != SephirahTeamModParameters.PackageId ||
-                __instance.GetPassiveModelList().All(x =>
-                    x.reservedData.currentpassive.id.packageId != SephirahTeamModParameters.PackageId))
-                return;
+            if (!(passive is PassiveAbility_AdditionalFloorTeam_ST4221 pas) ||
+                UI.UIController.Instance.CurrentUnit?.OwnerSephirah != pas.GetSephirah()) return;
             haspassiveState = GivePassiveState.Lock;
             __result = false;
         }
